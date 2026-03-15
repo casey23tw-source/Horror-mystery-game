@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a1410">
+<title>第七號病房 — AI 劇本殺</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blood: #8b0000;
+    --blood-bright: #c0392b;
+    --paper: #1a1410;
+    --paper-light: #221c16;
+    --paper-mid: #2d2520;
+    --ink: #d4c5a9;
+    --ink-dim: #7a6e5e;
+    --ink-faint: #3d3528;
+    --accent: #b8860b;
+    --accent-dim: #7a5c0a;
+    --glow: rgba(139,0,0,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Serif TC', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* Vignette */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* TITLE SCREEN */
+  #title-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 40px 20px;
+    position: relative;
+  }
+
+  .blood-drip {
+    position: absolute;
+    top: 0;
+    left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, transparent 10%, var(--blood) 30%, var(--blood-bright) 50%, var(--blood) 70%, transparent 90%);
+    box-shadow: 0 0 20px var(--blood);
+  }
+
+  .blood-drip::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 30%; right: 30%;
+    height: 40px;
+    background: linear-gradient(180deg, var(--blood) 0%, transparent 100%);
+    clip-path: polygon(5% 0, 10% 100%, 15% 0, 25% 100%, 35% 0, 45% 80%, 55% 0, 65% 100%, 75% 0, 85% 90%, 95% 0);
+  }
+
+  .room-number {
+    font-family: 'Special Elite', cursive;
+    font-size: clamp(11px, 2vw, 14px);
+    letter-spacing: 0.5em;
+    color: var(--blood-bright);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    animation: flicker 4s infinite;
+  }
+
+  @keyframes flicker {
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0.3; }
+    97% { opacity: 1; }
+    98% { opacity: 0.1; }
+    99% { opacity: 0.8; }
+  }
+
+  .main-title {
+    font-family: 'Special Elite', cursive;
+    font-size: clamp(42px, 10vw, 96px);
+    line-height: 0.9;
+    color: var(--ink);
+    text-shadow:
+      0 0 30px rgba(139,0,0,0.5),
+      2px 2px 0 rgba(0,0,0,0.8);
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .main-title .scratch {
+    position: relative;
+    display: inline-block;
+  }
+
+  .main-title .scratch::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: -5%;
+    width: 110%; height: 3px;
+    background: var(--blood);
+    transform: rotate(-2deg);
+    opacity: 0.8;
+  }
+
+  .subtitle {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: clamp(14px, 2.5vw, 20px);
+    color: var(--ink-dim);
+    letter-spacing: 0.15em;
+    margin-bottom: 50px;
+  }
+
+  .intro-text {
+    max-width: 560px;
+    font-family: 'Crimson Pro', serif;
+    font-size: clamp(15px, 2vw, 17px);
+    line-height: 1.9;
+    color: var(--ink-dim);
+    margin-bottom: 50px;
+    text-align: left;
+    padding: 30px;
+    border: 1px solid var(--ink-faint);
+    background: var(--paper-light);
+    position: relative;
+  }
+
+  .intro-text::before {
+    content: '案件檔案 #0731';
+    position: absolute;
+    top: -12px; left: 20px;
+    background: var(--paper-light);
+    padding: 0 10px;
+    font-family: 'Special Elite', cursive;
+    font-size: 11px;
+    color: var(--blood-bright);
+    letter-spacing: 0.2em;
+  }
+
+  .corner-mark {
+    position: absolute;
+    font-family: 'Special Elite', cursive;
+    font-size: 10px;
+    color: var(--ink-faint);
+  }
+  .corner-mark.tl { top: 8px; left: 8px; }
+  .corner-mark.tr { top: 8px; right: 8px; }
+  .corner-mark.bl { bottom: 8px; left: 8px; }
+  .corner-mark.br { bottom: 8px; right: 8px; }
+
+  .start-btn {
+    font-family: 'Special Elite', cursive;
+    font-size: 14px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--blood);
+    border: none;
+    padding: 16px 48px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s;
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  }
+
+  .start-btn:hover {
+    background: var(--blood-bright);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(139,0,0,0.6);
+  }
+
+  .start-btn:active { transform: translateY(0); }
+
+  /* GAME SCREEN */
+  #game-screen {
+    display: none;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--ink-faint);
+    margin-bottom: 20px;
+  }
+
+  .game-title-small {
+    font-family: 'Special Elite', cursive;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    color: var(--blood-bright);
+    animation: flicker 6s infinite;
+  }
+
+  .stats-bar {
+    display: flex;
+    gap: 20px;
+  }
+
+  .stat {
+    font-family: 'Special Elite', cursive;
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .stat span {
+    color: var(--accent);
+  }
+
+  /* Story area */
+  .story-container {
+    background: var(--paper-light);
+    border: 1px solid var(--ink-faint);
+    padding: 30px;
+    margin-bottom: 20px;
+    min-height: 320px;
+    max-height: 400px;
+    overflow-y: auto;
+    position: relative;
+    scroll-behavior: smooth;
+  }
+
+  .story-container::-webkit-scrollbar { width: 4px; }
+  .story-container::-webkit-scrollbar-track { background: var(--paper); }
+  .story-container::-webkit-scrollbar-thumb { background: var(--blood); }
+
+  .story-entry {
+    margin-bottom: 24px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .story-label {
+    font-family: 'Special Elite', cursive;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .story-label.gm { color: var(--blood-bright); }
+  .story-label.player { color: var(--accent); }
+  .story-label.system { color: var(--ink-faint); }
+
+  .story-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 17px;
+    line-height: 1.85;
+    color: var(--ink);
+  }
+
+  .story-text.gm-text {
+    border-left: 2px solid var(--blood);
+    padding-left: 16px;
+  }
+
+  .story-text.player-text {
+    color: var(--ink-dim);
+    font-style: italic;
+    border-left: 2px solid var(--accent-dim);
+    padding-left: 16px;
+  }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 0;
+  }
+
+  .typing-indicator.active { display: flex; }
+
+  .typing-dot {
+    width: 6px; height: 6px;
+    background: var(--blood-bright);
+    border-radius: 50%;
+    animation: typingPulse 1.2s infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typingPulse {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  .typing-text {
+    font-family: 'Special Elite', cursive;
+    font-size: 11px;
+    color: var(--blood);
+    letter-spacing: 0.2em;
+    animation: flicker 1.5s infinite;
+  }
+
+  /* Clues panel */
+  .clues-panel {
+    background: var(--paper-mid);
+    border: 1px solid var(--ink-faint);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+
+  .clues-title {
+    font-family: 'Special Elite', cursive;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--blood-bright);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  .clues-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .clue-tag {
+    font-family: 'Special Elite', cursive;
+    font-size: 10px;
+    padding: 4px 12px;
+    border: 1px solid var(--accent-dim);
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    cursor: default;
+    transition: all 0.2s;
+  }
+
+  .clue-tag:hover {
+    background: rgba(184, 134, 11, 0.1);
+    border-color: var(--accent);
+  }
+
+  .clue-tag.new {
+    border-color: var(--blood);
+    color: var(--blood-bright);
+    animation: newClue 2s ease;
+  }
+
+  @keyframes newClue {
+    0%, 100% { box-shadow: none; }
+    50% { box-shadow: 0 0 10px var(--blood); }
+  }
+
+  /* Input area */
+  .input-area {
+    background: var(--paper-light);
+    border: 1px solid var(--ink-faint);
+    padding: 16px 20px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    position: relative;
+  }
+
+  .input-area::before {
+    content: '偵探';
+    position: absolute;
+    top: -12px; left: 20px;
+    background: var(--paper-light);
+    padding: 0 10px;
+    font-family: 'Special Elite', cursive;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+  }
+
+  #player-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--ink-faint);
+    color: var(--ink);
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    padding: 8px 4px;
+    outline: none;
+    resize: none;
+    line-height: 1.6;
+    min-height: 44px;
+    max-height: 120px;
+    transition: border-color 0.2s;
+  }
+
+  #player-input:focus {
+    border-bottom-color: var(--accent);
+  }
+
+  #player-input::placeholder {
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  .send-btn {
+    font-family: 'Special Elite', cursive;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--paper);
+    background: var(--accent-dim);
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    align-self: flex-end;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  }
+
+  .send-btn:hover { background: var(--accent); }
+  .send-btn:disabled {
+    background: var(--ink-faint);
+    cursor: not-allowed;
+  }
+
+  /* Quick actions */
+  .quick-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .quick-btn {
+    font-family: 'Special Elite', cursive;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--ink-dim);
+    background: transparent;
+    border: 1px solid var(--ink-faint);
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .quick-btn:hover {
+    border-color: var(--ink-dim);
+    color: var(--ink);
+  }
+
+  /* Win/Lose overlay */
+  #result-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 40px;
+  }
+
+  #result-overlay.show { display: flex; }
+
+  .result-title {
+    font-family: 'Special Elite', cursive;
+    font-size: clamp(36px, 8vw, 72px);
+    margin-bottom: 20px;
+    animation: fadeIn 1s ease;
+  }
+
+  .result-title.win { color: var(--accent); text-shadow: 0 0 30px var(--accent); }
+  .result-title.lose { color: var(--blood-bright); text-shadow: 0 0 30px var(--blood); }
+
+  .result-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 18px;
+    color: var(--ink-dim);
+    max-width: 500px;
+    line-height: 1.8;
+    margin-bottom: 40px;
+  }
+
+  .restart-btn {
+    font-family: 'Special Elite', cursive;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    color: var(--paper);
+    background: var(--blood);
+    border: none;
+    padding: 14px 40px;
+    cursor: pointer;
+    transition: all 0.2s;
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  }
+
+  .restart-btn:hover {
+    background: var(--blood-bright);
+    box-shadow: 0 0 20px rgba(139,0,0,0.5);
+  }
+
+  /* Separator */
+  .sep {
+    text-align: center;
+    color: var(--ink-faint);
+    font-family: 'Special Elite', cursive;
+    font-size: 12px;
+    letter-spacing: 0.4em;
+    margin: 8px 0;
+  }
+
+  /* ── MOBILE OPTIMIZATIONS ── */
+  @media (max-width: 600px) {
+    body { cursor: default; }
+
+    /* Title screen */
+    #title-screen { padding: 60px 16px 40px; justify-content: flex-start; padding-top: 80px; }
+    .room-number { font-size: 9px; letter-spacing: 0.3em; }
+    .main-title { font-size: clamp(52px, 18vw, 72px); }
+    .subtitle { font-size: 13px; margin-bottom: 30px; }
+    .intro-text { padding: 20px 16px; font-size: 15px; margin-bottom: 30px; }
+    .start-btn { font-size: 13px; padding: 16px 40px; width: 100%; clip-path: none; }
+
+    /* Game layout — full-height flex column */
+    #game-screen {
+      display: none;
+      flex-direction: column;
+      height: 100dvh;
+      max-width: 100%;
+      padding: 0;
+      overflow: hidden;
+    }
+    #game-screen.active { display: flex; }
+
+    .game-header {
+      padding: 10px 14px;
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+    .game-title-small { font-size: 11px; }
+    .stats-bar { gap: 12px; }
+    .stat { font-size: 10px; }
+
+    /* Story fills remaining space */
+    .story-container {
+      flex: 1;
+      max-height: none;
+      min-height: 0;
+      padding: 16px 14px;
+      margin-bottom: 0;
+      border-left: none;
+      border-right: none;
+    }
+    .story-text { font-size: 16px; line-height: 1.8; }
+
+    /* Typing indicator */
+    .typing-indicator { padding: 8px 14px; flex-shrink: 0; }
+
+    /* Clues panel — horizontal scroll */
+    .clues-panel {
+      flex-shrink: 0;
+      padding: 10px 14px;
+      margin-bottom: 0;
+      border-left: none;
+      border-right: none;
+    }
+    .clues-title { font-size: 10px; margin-bottom: 8px; }
+    .clues-list {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .clues-list::-webkit-scrollbar { display: none; }
+    .clue-tag { white-space: nowrap; font-size: 10px; padding: 4px 10px; }
+
+    /* Input area */
+    .input-area {
+      flex-shrink: 0;
+      padding: 10px 14px;
+      border-left: none;
+      border-right: none;
+      border-bottom: none;
+      gap: 8px;
+    }
+    .input-area::before { left: 14px; }
+    #player-input { font-size: 16px; padding: 6px 4px; } /* 16px prevents iOS zoom */
+    .send-btn { font-size: 12px; padding: 10px 16px; clip-path: none; border-radius: 2px; }
+
+    /* Quick actions — horizontal scroll */
+    .quick-actions {
+      flex-shrink: 0;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 8px 14px 12px;
+      gap: 6px;
+      margin-top: 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    .quick-actions::-webkit-scrollbar { display: none; }
+    .quick-btn { white-space: nowrap; font-size: 10px; padding: 8px 14px; flex-shrink: 0; }
+
+    /* Result overlay */
+    .result-title { font-size: clamp(36px, 12vw, 56px); }
+    .result-text { font-size: 16px; }
+    .restart-btn { clip-path: none; width: 100%; }
+  }
+
+  /* Safe area for notched phones */
+  @supports (padding: max(0px)) {
+    @media (max-width: 600px) {
+      .quick-actions { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+      #title-screen { padding-top: max(80px, calc(40px + env(safe-area-inset-top))); }
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- TITLE SCREEN -->
+<div id="title-screen">
+  <div class="blood-drip"></div>
+
+  <div class="room-number">★ 案件檔案 ★ 1987年七月 ★ 封存中 ★</div>
+
+  <h1 class="main-title">
+    第七號<br><span class="scratch">病房</span>
+  </h1>
+  <p class="subtitle">AI 互動推理劇本殺</p>
+
+  <div class="intro-text">
+    <span class="corner-mark tl">◤</span>
+    <span class="corner-mark tr">◥</span>
+    <span class="corner-mark bl">◣</span>
+    <span class="corner-mark br">◢</span>
+    1987年，仁愛精神療養院第七號病房發生離奇命案。<br>
+    資深護士陳美玲陳屍於病房角落，<br>
+    死狀詭異，現場無任何闖入痕跡。<br><br>
+    院方封鎖消息，警方束手無策。<br>
+    <strong style="color:var(--ink)">你</strong>——一名神秘的私家偵探——<br>
+    在深夜收到一封匿名信，被引至此地……<br><br>
+    <em style="color:var(--blood-bright)">真相，往往比死亡更令人恐懼。</em>
+  </div>
+
+  <button class="start-btn" onclick="startGame()">進入病房</button>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game-screen">
+  <div class="game-header">
+    <div class="game-title-small">第七號病房</div>
+    <div class="stats-bar">
+      <div class="stat">線索 <span id="clue-count">0</span></div>
+      <div class="stat">回合 <span id="turn-count">0</span></div>
+      <div class="stat">嫌疑 <span id="suspect-level">低</span></div>
+    </div>
+  </div>
+
+  <div class="story-container" id="story-container">
+    <!-- Story entries appear here -->
+  </div>
+
+  <div class="typing-indicator" id="typing-indicator">
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-text">正在傳輸...</div>
+  </div>
+
+  <div class="clues-panel">
+    <div class="clues-title">🔍 已發現線索</div>
+    <div class="clues-list" id="clues-list">
+      <span style="font-family:'Crimson Pro',serif; font-style:italic; color:var(--ink-faint); font-size:14px;">尚未發現任何線索…</span>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <textarea
+      id="player-input"
+      placeholder="輸入你的行動或問題……（例如：檢查房間、詢問護士長、打開抽屜）"
+      rows="1"
+      onkeydown="handleKey(event)"
+      oninput="autoResize(this)"
+    ></textarea>
+    <button class="send-btn" id="send-btn" onclick="sendMessage()">調查</button>
+  </div>
+
+  <div class="quick-actions">
+    <button class="quick-btn" onclick="quickAction('環顧四周，觀察病房環境')">環顧四周</button>
+    <button class="quick-btn" onclick="quickAction('仔細檢查屍體')">檢查屍體</button>
+    <button class="quick-btn" onclick="quickAction('詢問在場的護士長關於死者的事')">詢問護士長</button>
+    <button class="quick-btn" onclick="quickAction('查看病歷紀錄')">查看病歷</button>
+    <button class="quick-btn" onclick="quickAction('我要指認兇手')">指認兇手 ⚠️</button>
+  </div>
+</div>
+
+<!-- RESULT OVERLAY -->
+<div id="result-overlay">
+  <div class="result-title" id="result-title">案件告破</div>
+  <div class="result-text" id="result-text"></div>
+  <button class="restart-btn" onclick="restartGame()">重新調查</button>
+</div>
+
+<script>
+// ─── Game State ─────────────────────────────────────────────
+const state = {
+  clues: [],
+  turns: 0,
+  suspectLevel: 0,
+  conversationHistory: [],
+  gameOver: false
+};
+
+const SYSTEM_PROMPT = `你是一個恐怖懸疑劇本殺的「地下城主」（GM），負責主持一個沉浸式推理遊戲。
+
+【背景設定】
+時間：1987年7月31日深夜
+地點：仁愛精神療養院，第七號病房
+事件：資深護士陳美玲（50歲）陳屍於病房角落，頸部有掐痕，但房門反鎖，無闖入痕跡
+
+【真相（玩家需要逐步發現）】
+真正兇手：病患林志明（35歲，偏執型精神分裂症，住院三年）
+作案動機：陳美玲長期虐待病患，私吞家屬探視費，林志明目睹後情緒失控
+作案方式：林志明曾在精神崩潰時偷藏了護士的備用鑰匙，在深夜趁機進入，案發後利用護士的鑰匙反鎖
+重要線索：
+1. 陳美玲制服口袋少了一把備用鑰匙
+2. 林志明右手有新的擦傷（掙扎傷）
+3. 藥品記錄顯示陳美玲曾調換病患藥物
+4. 病房角落牆上有「她活該」的血字（林志明所寫）
+5. 隔壁病患聽到深夜有兩人說話聲
+
+【其他嫌疑人（假線索）】
+- 院長王德明：與死者有金錢糾紛，但案發時有不在場證明
+- 護士長趙淑芬：與死者不合，但當晚值夜班有監控記錄
+
+【GM規則】
+1. 用繁體中文回應，語氣陰森沉重，充滿懸疑氣氛
+2. 每次回應控制在150-250字之間，描述要有畫面感
+3. 玩家「調查」或「詢問」時，給予相關線索，但不要直接說出答案
+4. 玩家「指認兇手」時，判斷是否正確並結束遊戲
+5. 偶爾加入令人不安的細節（怪聲、陰影、氣溫驟降等）增加恐怖氣氛
+6. 回應結尾偶爾提示「你注意到___」或「角落有些不對勁」引導調查
+7. 如果玩家做出不合理行為，用角色反應回應（不是拒絕，而是敘述後果）
+8. 偵測到新線索時，在回應末尾加上【新線索：XXX】的標記
+
+【開場白】已由系統提供，不需重複。直接回應玩家的行動。`;
+
+// ─── API Call ────────────────────────────────────────────────
+async function callClaude(userMessage) {
+  state.conversationHistory.push({ role: "user", content: userMessage });
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      system: SYSTEM_PROMPT,
+      messages: state.conversationHistory
+    })
+  });
+
+  const data = await response.json();
+  const text = data.content?.map(b => b.text || "").join("") || "...靜默...";
+
+  state.conversationHistory.push({ role: "assistant", content: text });
+  return text;
+}
+
+// ─── Parse Clues ─────────────────────────────────────────────
+function parseAndAddClues(text) {
+  const matches = [...text.matchAll(/【新線索：([^】]+)】/g)];
+  matches.forEach(m => {
+    const clue = m[1].trim();
+    if (!state.clues.includes(clue)) {
+      state.clues.push(clue);
+      addClueTag(clue, true);
+      updateClueCount();
+    }
+  });
+  return text.replace(/【新線索：[^】]+】/g, "").trim();
+}
+
+function addClueTag(clue, isNew = false) {
+  const list = document.getElementById("clues-list");
+  const empty = list.querySelector("span");
+  if (empty) empty.remove();
+
+  const tag = document.createElement("div");
+  tag.className = "clue-tag" + (isNew ? " new" : "");
+  tag.textContent = clue;
+  list.appendChild(tag);
+
+  setTimeout(() => tag.classList.remove("new"), 3000);
+}
+
+// ─── UI Helpers ──────────────────────────────────────────────
+function addStoryEntry(label, text, type) {
+  const container = document.getElementById("story-container");
+
+  const entry = document.createElement("div");
+  entry.className = "story-entry";
+
+  const labelEl = document.createElement("div");
+  labelEl.className = `story-label ${type}`;
+  labelEl.textContent = label;
+
+  const textEl = document.createElement("div");
+  textEl.className = `story-text ${type}-text`;
+  textEl.textContent = text;
+
+  entry.appendChild(labelEl);
+  entry.appendChild(textEl);
+  container.appendChild(entry);
+  container.scrollTop = container.scrollHeight;
+}
+
+function addSeparator() {
+  const container = document.getElementById("story-container");
+  const sep = document.createElement("div");
+  sep.className = "sep";
+  sep.textContent = "— ✦ —";
+  container.appendChild(sep);
+}
+
+function setTyping(active) {
+  document.getElementById("typing-indicator").className =
+    "typing-indicator" + (active ? " active" : "");
+}
+
+function updateClueCount() {
+  document.getElementById("clue-count").textContent = state.clues.length;
+}
+
+function updateTurnCount() {
+  document.getElementById("turn-count").textContent = state.turns;
+}
+
+function setSuspectLevel() {
+  const levels = ["低", "中", "高", "極高"];
+  const idx = Math.min(Math.floor(state.turns / 4), 3);
+  document.getElementById("suspect-level").textContent = levels[idx];
+}
+
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 120) + "px";
+}
+
+function handleKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+// ─── Game Flow ───────────────────────────────────────────────
+async function startGame() {
+  document.getElementById("title-screen").style.display = "none";
+  const gs = document.getElementById("game-screen");
+  gs.style.display = window.innerWidth <= 600 ? "flex" : "block";
+  gs.classList.add("active");
+
+  setTyping(true);
+
+  const openingMessage = "我進入了第七號病房，環顧四周，看看現場情況。";
+
+  try {
+    const response = await callClaude(openingMessage);
+    setTyping(false);
+
+    const cleaned = parseAndAddClues(response);
+    addStoryEntry("[ 第七號病房 ]", cleaned, "gm");
+    state.turns++;
+    updateTurnCount();
+    setSuspectLevel();
+  } catch (e) {
+    setTyping(false);
+    addStoryEntry("[ 系統 ]", "連線中斷……（請確認網路連線）", "system");
+  }
+}
+
+async function sendMessage() {
+  if (state.gameOver) return;
+
+  const input = document.getElementById("player-input");
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  input.value = "";
+  input.style.height = "auto";
+  document.getElementById("send-btn").disabled = true;
+
+  addSeparator();
+  addStoryEntry("[ 偵探 ]", msg, "player");
+
+  setTyping(true);
+
+  try {
+    const response = await callClaude(msg);
+    setTyping(false);
+
+    const cleaned = parseAndAddClues(response);
+    addStoryEntry("[ 第七號病房 ]", cleaned, "gm");
+
+    state.turns++;
+    updateTurnCount();
+    setSuspectLevel();
+
+    // Check for game end
+    checkGameEnd(msg, cleaned);
+
+  } catch (e) {
+    setTyping(false);
+    addStoryEntry("[ 系統 ]", "訊號干擾……請再試一次。", "system");
+  }
+
+  document.getElementById("send-btn").disabled = false;
+}
+
+function quickAction(action) {
+  document.getElementById("player-input").value = action;
+  sendMessage();
+}
+
+function checkGameEnd(msg, response) {
+  const lowerMsg = msg.toLowerCase();
+  const lowerRes = response;
+
+  const winKeywords = ["林志明", "是兇手", "林志明幹的", "指認林"];
+  const loseKeywords = ["你已死亡", "遊戲結束", "案件迷失", "真相永遠"];
+
+  if (winKeywords.some(k => lowerMsg.includes(k)) &&
+      (lowerRes.includes("正確") || lowerRes.includes("恭喜") || lowerRes.includes("林志明"))) {
+    setTimeout(() => showResult(true, response), 1500);
+    state.gameOver = true;
+  } else if (loseKeywords.some(k => lowerRes.includes(k))) {
+    setTimeout(() => showResult(false, response), 1500);
+    state.gameOver = true;
+  }
+}
+
+function showResult(win, summary) {
+  const overlay = document.getElementById("result-overlay");
+  const title = document.getElementById("result-title");
+  const text = document.getElementById("result-text");
+
+  overlay.classList.add("show");
+
+  if (win) {
+    title.textContent = "真相大白";
+    title.className = "result-title win";
+    text.textContent = `你揪出了隱藏在黑暗中的真兇。林志明被帶走時，臉上掛著詭異的微笑。\n第七號病房的秘密，終於見光。\n\n共發現 ${state.clues.length} 條線索，使用 ${state.turns} 個回合。`;
+  } else {
+    title.textContent = "迷失於黑暗";
+    title.className = "result-title lose";
+    text.textContent = `真相隨著漆黑的長廊消散了。\n兇手依舊逍遙法外，而你——\n也許已成為下一個受害者。\n\n發現 ${state.clues.length} 條線索，用了 ${state.turns} 個回合。`;
+  }
+}
+
+function restartGame() {
+  state.clues = [];
+  state.turns = 0;
+  state.suspectLevel = 0;
+  state.conversationHistory = [];
+  state.gameOver = false;
+
+  document.getElementById("result-overlay").classList.remove("show");
+  document.getElementById("story-container").innerHTML = "";
+  document.getElementById("clues-list").innerHTML =
+    '<span style="font-family:\'Crimson Pro\',serif; font-style:italic; color:var(--ink-faint); font-size:14px;">尚未發現任何線索…</span>';
+  document.getElementById("clue-count").textContent = "0";
+  document.getElementById("turn-count").textContent = "0";
+  document.getElementById("suspect-level").textContent = "低";
+
+  const gs2 = document.getElementById("game-screen");
+  gs2.style.display = window.innerWidth <= 600 ? "flex" : "block";
+  startGame();
+}
+</script>
+</body>
+</html>
